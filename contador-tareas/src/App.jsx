@@ -1,33 +1,69 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React, { useState, useEffect, useMemo } from 'react';
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [tareas, setTareas] = useState([]);
+  const [nuevaTarea, setNuevaTarea] = useState('');
+  const [duracion, setDuracion] = useState('');
+
+  useEffect(() => {
+    document.title = `Total: ${calcularTiempoTotal} minutos`;
+  }, [tareas])  
+
+  const calcularTiempoTotal = useMemo(() => {
+    console.log("Calculando tiempo total...");
+    return tareas.reduce((total, tarea) => total + tarea.duracion, 0);
+  }, [tareas])
+
+  const agregarTarea = () => {
+    const duracionNumero = parseInt(duracion);
+    if (nuevaTarea && !isNaN(duracionNumero)) {
+      const nuevaTareaObj = {
+        nombre: nuevaTarea,
+        duracion: parseInt(duracion)
+      };
+      setTareas([...tareas, nuevaTareaObj]);
+      setNuevaTarea('');
+      setDuracion('');
+    }
+  }
+
+  const eliminarTarea = (index) =>{
+    const nuevasTareas = tareas.filter((_,i) => i !=index);
+    setTareas(nuevasTareas);
+  }
 
   return (
     <>
+    <div className='container'>
+      <h1>Contador de Tareas</h1>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <input 
+          type="text" 
+          value={nuevaTarea} 
+          onChange={(e) => setNuevaTarea(e.target.value)} 
+          placeholder="Nombre de la tarea" 
+        />
+        <input 
+          type="number" 
+          value={duracion} 
+          onChange={(e) => setDuracion(e.target.value)} 
+          placeholder="Duración en minutos" 
+        />
+        <button onClick={agregarTarea}>Agregar tarea</button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+
+      <h2>Tareas</h2>
+      <ul>
+        {tareas.map((tarea, index) => (
+          <li key={index}>{tarea.nombre}: {tarea.duracion} minutos
+           <button onClick={() => eliminarTarea(index)}>Eliminar</button>
+          </li>
+        ))}
+      </ul>
+
+      <h3>Total de tiempo: {calcularTiempoTotal} minutos</h3>
+    </div>
     </>
   )
 }
